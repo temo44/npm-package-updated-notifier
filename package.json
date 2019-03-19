@@ -1,0 +1,14 @@
+{
+  "name": "notifier",
+  "version": "0.0.1",
+  "description": "notifies when packages updates",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Timo",
+  "license": "ISC",
+  "dependencies": {
+    "node-notifier": "^5.4.0"
+  }
+}
