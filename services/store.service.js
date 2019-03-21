@@ -27,20 +27,40 @@ exports.getSavedPackages = () => {
   });
 };
 
-exports.setSavedPackages = packagesToStore => {
+exports.setSavedPackages = updatedPackages => {
   return new Promise((resolve, error) => {
-    if (!packagesToStore || packagesToStore.length === 0) {
+    if (!updatedPackages || updatedPackages.length === 0) {
       return resolve();
     }
 
-    const contentToWrite = JSON.stringify(packagesToStore);
+    exports.getSavedPackages().then(localPackages => {
+      const packagesToStore = mergeLocalPackagesWithUpdatedPackages(localPackages, updatedPackages);
 
-    writeFile(filePath, contentToWrite, err => {
-      if (err) {
-        return error(err);
-      }
+      const contentToWrite = JSON.stringify(packagesToStore);
 
-      return resolve();
+      writeFile(filePath, contentToWrite, err => {
+        if (err) {
+          return error(err);
+        }
+
+        return resolve();
+      });
     });
   });
 };
+
+function mergeLocalPackagesWithUpdatedPackages(localPackages, updatedPackages) {
+  updatedPackages.forEach(packageToStore => {
+    const existingPackage = localPackages.find(
+      localPackage => localPackage.name === packageToStore.name
+    );
+
+    if (existingPackage) {
+      existingPackage.version = packageToStore.version;
+    } else {
+      localPackages.push(packageToStore);
+    }
+  });
+
+  return localPackages;
+}

@@ -14,17 +14,29 @@ class PackageVersion {
 exports.PackageVersion = PackageVersion;
 
 exports.getLatestVersionByNames = packageNames => {
-  let updatedPackagesPromises = [];
-  packageNames.forEach(packageName => {
-    updatedPackagesPromises.push(exports.getLatestVersionByName(packageName));
-  });
+  let updatedPackages = [];
 
-  return Promise.all(updatedPackagesPromises);
+  return getLatestVersionsSequentially(packageNames, 0, updatedPackages);
+};
+
+const getLatestVersionsSequentially = (packageNames, index, resultList) => {
+  const packageName = packageNames[index];
+  return exports.getLatestVersionByName(packageName).then(result => {
+    resultList.push(result);
+
+    if (index < packageNames.length - 1) {
+      index += 1;
+      return getLatestVersionsSequentially(packageNames, index, resultList);
+    } else {
+      return resultList;
+    }
+  });
 };
 
 exports.getLatestVersionByName = packageName => {
   return new Promise((resolve, error) => {
-    exec(`npm show ${packageName} version`, (err, stdout, stderr) => {
+    console.log(`fetching version for ${packageName}`);
+    exec(`npm view ${packageName} version`, (err, stdout, stderr) => {
       if (err) {
         return error(err);
       }
